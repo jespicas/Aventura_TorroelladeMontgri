@@ -1,0 +1,124 @@
+/* Default colors and sizes */
+body {
+	background-color:black;
+	color:white;
+	font-familiy:Verdana,Arial,Helvetica;
+	font-size:20px;
+}
+
+/* Hiperenlaces */
+a {
+	color:#777700;
+	text-decoration:none
+}
+
+a:hover {
+	color:#ffff00;
+	text-decoration:none
+}
+
+a:visited {
+	color:#00ff00;
+	text-decoration:none
+}
+
+/* Intro div, before game */
+#dvIntro {
+	text-align:center
+}
+
+#hrIntroSeparator {
+	color:#000044;
+	background-color: #000044;
+	height:3px;
+	border:0
+}
+
+#btBoot {
+	color:#770000;
+	font-weight:bold
+}
+
+/* Game title */
+#dvTitle {
+	font-size:28px;
+	color:lightgray
+}
+
+/* Game div */
+#dvFi {
+	width:100%;
+	height:10%
+}
+
+#hrFiSeparator {
+	color:#000044;
+	background-color:#000044;
+	height:3px;
+	border:0
+}
+
+/* Name of the room */
+#dvId {
+	width:100%;
+	height:10%;
+	color:#77aaff;
+	font-familiy:Verdana,Arial,Helvetica;
+	font-size:22px;
+	font-style:italic
+}
+
+/* Image */
+#dvPic {
+	width:100%;
+	height:40%;
+	text-align:center
+}
+
+/* Description text for current room */
+#dvDesc  {
+	color: green;
+	width:100%;
+	height:10%;
+	font-familiy: Verdana,Arial,Helvetica;
+	font-size:22px;
+}
+
+/* Game's answer text */
+#dvAnswer {
+	width:100%;
+	height:10%;
+	font-familiy: Verdana,Arial,Helvetica;
+	font-size:20px;
+}
+
+/* Input section, prompt, icons... */
+#dvInput {
+	color:white;
+	background-color:black;
+	width:100%;
+	height:10%;
+	font-familiy: Verdana,Arial,Helvetica;
+	font-size:20px;
+}
+
+#edInput{
+	width:85%;
+	color:white;
+	background-color:black;
+	border:none;
+	font-size:20px;
+	border:1px dotted gray;
+	border-radius: 10px;
+	padding:6px
+}
+
+/* Error section, this is normally not seen by players */
+#dvError {
+	color:white;
+	background-color:red;
+	width:100%;
+	height:10%;
+	font-familiy:Verdana,Arial,Helvetica;
+	font-size:24px;
+}
