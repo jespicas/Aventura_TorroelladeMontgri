@@ -38,63 +38,42 @@ var locInici = ctrl.lugares.creaLoc( "Inici cami",
    var locCamp = ctrl.lugares.creaLoc(
     "Camp",
     [ "camp" ],
-    "Te hallas en la biblioteca del castillo. Obviamente está \
-           llena de ${libros, ex libros} interesantes, pero \
-           desgraciadamente no tienes \
-           tiempo para leerlos.<br>Salidas visibles: ${oeste, oeste}."
+    "Et trobes en un camp i et dones compte que no va enlloc. L'unica sortida que es tornar enrera."
    );
 
    var locCampOliveras = ctrl.lugares.creaLoc(
     "CampOliveras",
     [ "campoliveras" ],
-    "Te hallas en la biblioteca del castillo. Obviamente está \
-           llena de ${libros, ex libros} interesantes, pero \
-           desgraciadamente no tienes \
-           tiempo para leerlos.<br>Salidas visibles: ${oeste, oeste}."
+    "Mires i veus tot un camp d'oliveres."
    );
 
    var locCamipujada = ctrl.lugares.creaLoc(
    	"Camipujada",
    	[ "camipujada" ],
-   	"Te hallas en la biblioteca del castillo. Obviamente está \
-           llena de ${libros, ex libros} interesantes, pero \
-           desgraciadamente no tienes \
-           tiempo para leerlos.<br>Salidas visibles: ${oeste, oeste}."
+   	"Comences a enfilar-te cap amunt."
    );
 
    var locCreueta = ctrl.lugares.creaLoc(
    	"Creueta",
    	[ "creueta" ],
-   	"Te hallas en la biblioteca del castillo. Obviamente está \
-           llena de ${libros, ex libros} interesantes, pero \
-           desgraciadamente no tienes \
-           tiempo para leerlos.<br>Salidas visibles: ${oeste, oeste}."
+   	"Et pares a la creueta per admirar el paissatge.Al voler pujar a la creueta t'adones que t'han caigut les claus del cotxe al moment que vas per ajupir un esquirol t'agafa les claus."
    );
 
    var locCamiCau = ctrl.lugares.creaLoc(
    	"CamiCauCastell",
    	[ "camiCauCastell" ],
-   	"Te hallas en la biblioteca del castillo. Obviamente está \
-           llena de ${libros, ex libros} interesantes, pero \
-           desgraciadamente no tienes \
-           tiempo para leerlos.<br>Salidas visibles: ${oeste, oeste}."
+   	"Continues corrents a veure si atrapes l'esquirol"
    );
    var locCau = ctrl.lugares.creaLoc(
    	"Cau",
    	[ "cau" ],
-   	"Te hallas en la biblioteca del castillo. Obviamente está \
-           llena de ${libros, ex libros} interesantes, pero \
-           desgraciadamente no tienes \
-           tiempo para leerlos.<br>Salidas visibles: ${oeste, oeste}."
+   	"Veus que l' esquirol s'ha adentrat al cau del duc i tu decideixes adentrar-te a la muntanya."
    );
 
    var locCastell = ctrl.lugares.creaLoc(
    	"Castell",
    	[ "castell" ],
-   	"Te hallas en la biblioteca del castillo. Obviamente está \
-           llena de ${libros, ex libros} interesantes, pero \
-           desgraciadamente no tienes \
-           tiempo para leerlos.<br>Salidas visibles: ${oeste, oeste}."
+   	"Estas al castell pero tu lo que busques es l'esquirol"
    );
    var jugador = ctrl.personas.creaPersona( "Edmundo Dant&eacute;s",
                        [ "jugador" ],
