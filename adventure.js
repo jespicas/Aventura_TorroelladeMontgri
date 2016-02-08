@@ -67,7 +67,7 @@ var locInici = ctrl.lugares.creaLoc( "Inici cami",
    var locCau = ctrl.lugares.creaLoc(
    	"Cau",
    	[ "cau" ],
-   	"Veus que l' esquirol s'ha adentrat al cau del duc i tu decideixes adentrar-te a la muntanya."
+   	"Veus que l' esquirol s'ha adentrat al cau del duc i tu decideixes adentrar-te a la muntanya. Perseguint l'esquirol trepitges malament sobre unes pedres i rellisques i caus de tal manera que et dones un cop molt fort en el cap.Quan et despertes esta tot emborinat i casi no veus res. Fas una pasa i sens com si la pared d' obris"
    );
 
    var locCastell = ctrl.lugares.creaLoc(
