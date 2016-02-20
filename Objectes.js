@@ -1,7 +1,7 @@
 var objPou = ctrl.creaObj(
   "pou",
   ["construccio", "antic"],
-   "Un pou anys enrera si podia obtenir aigua, però actualment esta tapiat per una contaminació de les aigues <img src='res/pou.JPG' />",
+   "Un pou anys enrera si podia obtenir aigua, però actualment esta tapiat per una contaminació de les aigues <img src='res/Pou.png' />",
    locInici,
    Ent.Escenario);
 
