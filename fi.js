@@ -1,7 +1,7 @@
 // fi.js
 /**
  * Motor de ficc. interactiva (fi.js IF Engine)
- * Licencia MIT (c) baltasar@gmail.com 201405
+ * Licencia MIT (c) baltasar@gmail.com 2014, 2015, 2016
  */
 
 var Ent = function() {
@@ -268,11 +268,17 @@ var Loc = function(n, i, s, d) {
 
     this.devSalida = this.getExit;
 
-    this.doEachTurn = function() {
-        return;
+    this.postExamine = function() {
+        if ( typeof( this.postExamina ) === "function" ) {
+            this.postExamina();
+        }
     }
 
-    this.hazCadaTurno = this.doEachTurn;
+    this.doEachTurn = function() {
+        if ( typeof( this.hazCadaTurno ) === "function" ) {
+            this.hazCadaTurno();
+        }
+    }
 };
 
 var Obj = function(n, i, s, l, d) {
@@ -285,6 +291,7 @@ var Obj = function(n, i, s, l, d) {
     this.owner = l;
 
     this.objs = [];
+    this.examinations = 0;
     this.container = false;
     this.scenery = false;
     this.reachable = true;
@@ -410,8 +417,8 @@ var Persona = function(n, i, l, d) {
 };
 
 var ctrl = ( function() {
-    var tit = "Ficción interactiva";
-    var intro = "¡Comienza la aventura!";
+    var tit = "Ficci&oacute;n interactiva";
+    var intro = "&iexcl;Comienza la aventura!";
     var pic = null;
     var aut = "";
     var version = "";
@@ -419,6 +426,17 @@ var ctrl = ( function() {
     var useScore = false;
     var alarms = [];
     var daemons = {};
+    var history = "";
+    var seed = 1;
+    var gameEnded = false;
+
+    function isGameOver() {
+        return gameEnded;
+    }
+
+    function setGameOver() {
+        gameEnded = true;
+    }
 
     function Alarm(turns, trigger) {
 		this.turns = turns;
@@ -428,6 +446,105 @@ var ctrl = ( function() {
     function Daemon(id, fn) {
         this.id = id;
         this.fn = fn;
+    }
+
+    function addToHistory(cmd) {
+        if ( history.length > 0 ) {
+            history += "\n";
+        }
+
+        if ( cmd != null ) {
+            cmd = cmd.trim();
+            var s = { "verb": cmd };
+
+            if ( !saveAction.match( s )
+            &&   !loadAction.match( s ) )
+            {
+                history += cmd;
+            }
+        }
+
+        return;
+    }
+
+    function setRndSeed(x) {
+        if ( arguments.length == 0 ) {
+            x = new Date().getTime();
+        }
+
+        seed = x;
+    }
+
+    function rnd(min, max) {
+        if ( arguments.length < 2 ) {
+            max = 100;
+        }
+
+        if ( arguments.length < 1 ) {
+            min = 1;
+        }
+
+        var x = Math.sin( seed++ ) * 10000;
+        x -= Math.floor( x );
+        return Math.floor( ( x * ( max - min ) ) + min );
+    }
+
+    function save() {
+        var toret = false;
+        var savegame = {
+            "seed": seed,
+            "history": history
+        };
+
+        if ( typeof( Storage ) !== "undefined" ) {
+            localStorage.setItem( "fi_js-SaveGame", JSON.stringify( savegame ) );
+            toret = true;
+        }
+
+        return toret;
+    }
+
+    function load() {
+        var toret = false;
+
+        if ( typeof( Storage ) !== "undefined" ) {
+            var strSavegame = localStorage.getItem( "fi_js-SaveGame" );
+
+            if ( strSavegame != null ) {
+                var savegame = JSON.parse( strSavegame );
+                var newSeed = savegame.seed;
+                var newHistory = savegame.history;
+                ctrl.boot();
+
+                // Restore command history
+                if ( newHistory != null ) {
+                    history = "";
+                    history = newHistory;
+                }
+
+                // Restore seed
+                if ( newSeed != null ) {
+                    seed = newSeed;
+                }
+
+                cmds = history.split( '\n' );
+
+                for(var i = 0; i < cmds.length; ++i) {
+                    var cmd = cmds[ i ];
+                    var s = { "verb": cmd };
+
+                    if ( !saveAction.match( s )
+                      && !loadAction.match( s ) )
+                    {
+                        parser.parse( cmd );
+                    }
+                }
+
+                toret = true;
+            }
+        }
+
+        return toret;
     }
 
 	function setAlarm(turns, f) {
@@ -464,6 +581,87 @@ var ctrl = ( function() {
         }
 
         delete daemons.id;
+    }
+
+    var prepBuildingOrder = "";
+
+    function updateObjects()
+    {
+        var dvObjects = document.getElementById( "dvObjects" );
+
+        if ( dvObjects == null ) {
+            return;
+        }
+
+        var inventory = ctrl.personas.getPlayer().objs;
+        var reachable = ctrl.lugares.getCurrentLoc().objs;
+        var personas = ctrl.lugares.getCurrentLoc().personas;
+        var pObjects = document.createElement( "p" );
+        var strEntitiesList = "";
+        var refPrefix = "<a href=\"javascript:ctrl.addTerm('";
+
+        if ( personas.length > 1 ) {
+                strEntitiesList += "/ ";
+                for(var i = 0; i < personas.length; ++i) {
+                        if ( personas[ i ] != ctrl.personas.getPlayer() ) {
+                                strEntitiesList +=
+                                        refPrefix
+                                        + personas[ i ].id
+                                        + "');\">"
+                                        + personas[ i ].id
+                                        + "</a>  / ";
+                        }
+                }
+
+
+                strEntitiesList += "<br />";
+        }
+
+        if ( inventory.length > 0 ) {
+                strEntitiesList += "/ ";
+                for(var i = 0; i < inventory.length; ++i) {
+                        strEntitiesList +=
+                                refPrefix
+                                + inventory[ i ].id
+                                + "');\">"
+                                + inventory[ i ].id
+                                + "</a>  / ";
+                }
+
+                strEntitiesList += "<br />";
+        }
+
+
+        if ( reachable.length > 0 ) {
+                strEntitiesList += "/ ";
+                for(var i = 0; i < reachable.length; ++i) {
+                        strEntitiesList +=
+                                refPrefix
+                                + reachable[ i ].id
+                                + "');\">"
+                                + reachable[ i ].id
+                                + "</a>  / ";
+                }
+        }
+
+        dvObjects.innerHTML = "";
+        dvObjects.appendChild( pObjects );
+        pObjects.innerHTML = strEntitiesList;
+
+        return;
+    }
+
+    function addTerm(w)
+    {
+        var doEnter = ( this.prepBuildingOrder.length == 0 );
+
+        ctrl.inject( w, doEnter, false );
+
+        if ( !doEnter ) {
+                ctrl.inject( this.prepBuildingOrder, false, false );
+        }
+
+        this.prepBuildingOrder = "";
     }
 
     function hasScore() {
@@ -682,11 +880,10 @@ var ctrl = ( function() {
         }
 
         if ( replace ) {
-                edInput.value = txt;
-        } else {
-            edInput.value += txt;
+            edInput.value = "";
         }
 
+        edInput.value += txt;
 
         if ( enter ) {
             btSend.click();
@@ -702,7 +899,16 @@ var ctrl = ( function() {
         var pAnswer = document.createElement( "p" );
 
         pAnswer.innerHTML = cnvtTextLinksToHtml( msg );
-        dvAnswer.appendChild( pAnswer );
+
+        // Delay text appearance to make clear something changed.
+        setTimeout(
+            function() { dvAnswer.appendChild( pAnswer ); },
+            100 );
+    }
+
+    function clearAnswers()
+    {
+        getHtmlPart( "dvAnswer", "missing answer div" ).innerHTML = "";
     }
 
     function endGame(msg, pic)
@@ -716,7 +922,7 @@ var ctrl = ( function() {
         if ( arguments.length < 2 ) {
             pic = null;
         }
-        else
+
         if ( arguments.length < 1 ) {
             msg = "Has ganado.";
         }
@@ -735,6 +941,7 @@ var ctrl = ( function() {
         dvPic = document.createElement( "div" );
         dvDesc.appendChild( dvPic );
         dvPic.style.display = "none";
+        dvDesc.style = "scroll-y: hidden; scroll-x: hidden; height: 75%";
 
         if ( pic != null ) {
             var pImg = document.createElement( "p" );
@@ -755,6 +962,7 @@ var ctrl = ( function() {
         dvDesc.appendChild( pDesc );
 
 
+        setGameOver();
         return;
     }
 
@@ -767,6 +975,12 @@ var ctrl = ( function() {
      */
     function cnvtTextLinksToHtml(txt)
     {
+        if ( arguments.length < 1
+          || txt == null )
+        {
+            txt = "";
+        }
+
         var linkEndPos = 0;
         var linkPos = txt.indexOf( "${" );
 
@@ -778,7 +992,7 @@ var ctrl = ( function() {
                 var parts = txtLink.split( ',' );
                 var link = "<a onClick=\"javascript: ctrl.inject('"
                             + parts[ 1 ]
-                            + "')\" href='javascript:void(0)'>"
+                            + "', true, true)\" href='javascript:void(0)'>"
                             + parts[ 0 ]
                             + "</a>";
                 txt = txt.slice( 0, linkPos ) + link
@@ -868,6 +1082,10 @@ var ctrl = ( function() {
 
         function doDesc(loc, desc)
         {
+            if ( ctrl.isGameOver() ) {
+                return;
+            }
+
             // Remove any pending answer
             ctrl.getHtmlPart( "dvAnswer", "missing div answer" ).innerHTML = "";
 
@@ -886,6 +1104,7 @@ var ctrl = ( function() {
 
             updateDesc( loc, desc );
             ++loc.visits;
+            loc.postExamine();
         }
 
         function updateDesc(loc, desc)
@@ -1300,6 +1519,7 @@ var ctrl = ( function() {
 
         frmInput.reset();
         frmInput[ "edInput" ].focus();
+        history = "";
         return false;
     }
 
@@ -1534,6 +1754,8 @@ var ctrl = ( function() {
         "cnvtTextLinksToHtml": cnvtTextLinksToHtml,
         "cnvtEnlacesHtml": cnvtTextLinksToHtml,
         "print": print,
+        "clearAnswers": clearAnswers,
+        "eliminaRespuestas": clearAnswers,
         "setNewTurn": setNewTurn,
         "getTurns": getTurns,
         "devTurnos": getTurns,
@@ -1563,17 +1785,32 @@ var ctrl = ( function() {
         "ponDaemon": addDaemon,
         "devDaemon": getDaemon,
         "borraDaemon": removeDaemon,
+        "updateObjects": updateObjects,
+        "actualizaObjetos": updateObjects,
+        "prepBuildingOrder": prepBuildingOrder,
+        "addTerm": addTerm,
+        "addToHistory": addToHistory,
+        "save": save,
+        "load": load,
+        "rnd": rnd,
+        "setRndSeed": setRndSeed,
+        "isGameOver": isGameOver,
+        "setGameOver": setGameOver,
+        "esFinJuego": isGameOver,
+        "ponFinJuego": setGameOver
     };
 }() );
 
 var parser = ( function() {
 
     var sentence = {
+        // Objects (only filled after parsing)
         persona: null,
         act: null,
         obj1: null,
         obj2: null,
 
+        // Terms employed by the user
         verb: null,
         term1: null,
         prep: null,
@@ -1598,12 +1835,12 @@ var parser = ( function() {
     var IgnoredWords = ( function() {
         var Particles = [
             "el", "la", "las", "los", "un", "una", "uno", "y", "o",
-            "pero", "dentro", "cuidadosamente", "lentamente", "rapidamente"
+            "pero", "cuidadosamente", "lentamente", "rapidamente"
         ];
 
         var Prepositions = [
             "a", "al", "ante", "bajo", "cabe", "con", "contra", "de", "del",
-            "desde", "en", "entre", "hacia", "hasta", "para", "por",
+            "dentro", "desde", "en", "entre", "hacia", "hasta", "para", "por",
             "segun", "sin", "so", "sobre", "tras"
         ];
 
@@ -1635,14 +1872,15 @@ var parser = ( function() {
         var dvAnswer = ctrl.getHtmlPart( "dvAnswer", "missing div answer" );
         var cmd = frmInput[ "edInput" ].value.trim().toLowerCase();
 
-        dvAnswer.innerHTML = "";
-
         if ( cmd.length > 0 ) {
             var txtAnswer = ctrl.cnvtTextLinksToHtml( parse( cmd ) );
 
-            var pAnswer = document.createElement( "p" );
-            pAnswer.innerHTML = txtAnswer;
-            dvAnswer.appendChild( pAnswer );
+            if ( txtAnswer != null
+              && txtAnswer != "" )
+            {
+                dvAnswer.innerHTML = "";
+                ctrl.print( txtAnswer );
+            }
         }
 
         frmInput.reset();
@@ -1683,47 +1921,41 @@ var parser = ( function() {
 
     function setSentenceParticles(ws)
     {
-        sentence.init();
+        // 0 == verb, 1 == term1, 2 == term2
+        var status = 0;
 
+        sentence.init();
         for(var i = 0; i < ws.length; ++i )
         {
             var w = canonical( ws[ i ] );
 
-            // Set verb
-            if ( i == 0 ) {
-                if ( !IgnoredWords.isPreposition( w ) ) {
+            // First particle must be mandatorily a verb
+            if ( i == 0
+              && IgnoredWords.isPreposition( w ) )
+            {
+                break;
+            }
+
+            // Set all particles
+            if ( !IgnoredWords.isPreposition( w ) ) {
+                if ( status == 0 ) {
                     sentence.verb = w;
-                } else {
+                    ++status;
+                }
+                else
+                if ( status == 1 ) {
+                    sentence.term1 = w;
+                    ++status;
+                }
+                else
+                if ( status == 2 ) {
+                    sentence.term2 = w;
                     break;
                 }
-            }
-            else
-            // Set noun1
-            if ( i == 1 ) {
-                if ( !IgnoredWords.isPreposition( w ) ) {
-                    sentence.term1 = w;
-                } else {
-                    sentence.prep = w;
-                }
-            }
-            // Set noun2
-            else
-            if ( i == 2 ) {
-                if ( IgnoredWords.isPreposition( w ) ) {
-                    sentence.prep = w;
-                } else {
-                    if ( sentence.term1 != null ) {
-                        sentence.term2 = w;
-                        break;
-                    } else {
-                        sentence.term1 = w;
-                    }
-                }
             } else {
-				if ( !IgnoredWords.isPreposition( w ) ) {
-					sentence.term2 = w;
-					break;
-				}
+                if ( sentence.prep == null ) {
+                    sentence.prep = w;
+                }
             }
         }
 
@@ -1767,7 +1999,6 @@ var parser = ( function() {
 	 */
     function prepareInput(cmd)
 	{
-
 		var accentedVowels = "áéíóúäëïöüâêîôûàèìòùÁÉÍÓÚÄËÏÖÜÂÊÎÔÛÀÈÌÒÙ";
 		var regularVowels = "aeiou";
 		var specialChars = "ñÑçÇ";
@@ -1824,23 +2055,36 @@ var parser = ( function() {
         toret = inputTransformation();
 
         if ( toret == "" ) {
-            identifyObjects();
             toret = "No puedes hacer eso.";
 
+            if ( ctrl.isObjAround( sentence.verb ) != null ) {
+                    var examineAction = actions.getAction( "examine" );
+
+                    sentence.term1 = sentence.verb;
+                    sentence.verb = examineAction.verbs[ 0 ];
+            }
+
             // Execute action
-            if ( sentence.act != null ) {
-                var playerAnswer = player.preAction();
+            ctrl.addToHistory( cmd );
+            var playerAnswer = player.preAction();
 
-                if ( playerAnswer == "" ) {
-                    toret = sentence.act.doIt( sentence );
-                    player.postAction();
-                } else {
-                    toret = playerAnswer;
-                }
+            if ( playerAnswer == "" ) {
+                identifyObjects();
+                toret = sentence.act.doIt( sentence );
+                player.postAction();
+            } else {
+                toret = playerAnswer;
+            }
 
+            if ( !ctrl.isGameOver() ) {
                 loc.doEachTurn();
                 ctrl.setNewTurn();
+                ctrl.updateObjects();
             }
+        }
+
+        if ( ctrl.isGameOver() ) {
+            toret = "";
         }
 
         return toret;
@@ -1955,36 +2199,40 @@ var actions = ( function() {
 
     function execute(actionId, noun1, noun2)
     {
-        var toret = "No tiene sentido";
+        var toret = "";
 
-        if ( arguments.length === 0 ) {
-            actionId = null;
-            noun1 = null;
-            noun2 = null;
+        if ( !ctrl.isGameOver() ) {
+            toret = "No tiene sentido";
+
+            if ( arguments.length === 0 ) {
+                actionId = null;
+                noun1 = null;
+                noun2 = null;
+            }
+            else
+            if ( arguments.length === 1 ) {
+                noun1 = null;
+                noun2 = null;
+            }
+            else
+            if ( arguments.length === 2 ) {
+                noun2 = null;
+            }
+
+            var action = getAction( actionId,
+                    "trying: actions.execute() with '" + actionId + "'"
+            );
+
+            if ( action != null ) {
+                parser.sentence.init();
+                parser.sentence.verb = action.verbs[ 0 ];
+                parser.sentence.term1 = noun1;
+                parser.sentence.term2 = noun2;
+                parser.idObjs();
+
+                toret = action.doIt( parser.sentence );
+            }
         }
-        else
-        if ( arguments.length === 1 ) {
-            noun1 = null;
-            noun2 = null;
-        }
-        else
-        if ( arguments.length === 2 ) {
-            noun2 = null;
-        }
-
-		var action = getAction( actionId,
-                "trying: actions.execute() with '" + actionId + "'"
-        );
-
-		if ( action != null ) {
-			parser.sentence.init();
-			parser.sentence.verb = action.verbs[ 0 ];
-			parser.sentence.term1 = noun1;
-			parser.sentence.term2 = noun2;
-			parser.idObjs();
-
-			toret = action.doIt( parser.sentence );
-		}
 
         return toret;
     }

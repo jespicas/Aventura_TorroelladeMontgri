@@ -44,19 +44,19 @@ var locInici = ctrl.lugares.creaLoc( "Inici cami",
    var locCampOliveras = ctrl.lugares.creaLoc(
     "CampOliveras",
     [ "campoliveras" ],
-    "Mires i veus tot un camp d'oliveres."
+    "Mires i veus tot un camp amb algunes oliveres."
    );
 
    var locCamipujada = ctrl.lugares.creaLoc(
    	"Camipujada",
    	[ "camipujada" ],
-   	"Comences a enfilar-te cap amunt."
+   	"Comences a enfilar-te per el camí, amunt, amunt."
    );
 
    var locCreueta = ctrl.lugares.creaLoc(
    	"Creueta",
    	[ "creueta" ],
-   	"Et pares a la creueta per admirar el paissatge.Al voler pujar a la creueta t'adones que t'han caigut les claus del cotxe al moment que vas per ajupir un esquirol t'agafa les claus."
+   	"Et pares a la creueta per admirar el paissatge.Al voler pujar a la creueta t'adones que t'han caigut les claus del cotxe, en el moment que vas per ajupir-te un esquirol t'agafa les claus."
    );
 
    var locCamiCau = ctrl.lugares.creaLoc(
@@ -74,6 +74,11 @@ var locInici = ctrl.lugares.creaLoc( "Inici cami",
    	"Castell",
    	[ "castell" ],
    	"Estas al castell pero tu lo que busques es l'esquirol"
+   );
+   var locCauTancat = ctrl.lugares.creaLoc(
+   	"CauTancat",
+   	[ "CauTancat" ],
+   	"No pots anar enrera.. estas tancat"
    );
    var jugador = ctrl.personas.creaPersona( "Edmundo Dant&eacute;s",
                        [ "jugador" ],
@@ -93,6 +98,7 @@ var locInici = ctrl.lugares.creaLoc( "Inici cami",
    locCreueta.ponSalidaBi("este", locCamiCau);
    locCamiCau.ponSalidaBi("este", locCastell);
    locCamiCau.ponSalidaBi("sur", locCau);
+   locCau.ponSalidaBi("sur", locCauTancat);
 
    ctrl.lugares.ponInicio( locInici );
    ctrl.personas.cambiaJugador( jugador );

@@ -2,38 +2,41 @@
 
 /**
  * Acciones (fi.js IF Engine)
- * Licencia MIT (c) baltasar@gmail.com 201405
+ * Licencia MIT (c) baltasar@gmail.com 201405, 201506, 201701
  */
 
 // --------------------------------------------------------- Examine
 var examineAction = actions.crea( "examine",
-        [ "x", "ex", "examina", "examinar", "examino" ]
+        [ "x", "ex", "examina", "examinar", "examino",
+          "leer", "lee", "leo"
+        ]
 );
 
 examineAction.exe = function(s) {
     var toret = "No veo de eso en derredor.";
+    var objDesc = s.obj1;
 
     if ( s.term1 == null ) {
         toret = "Deber&iacute;as especificar qu&eacute;.";
     }
     else
-    if ( s.obj1 != null ) {
+    if ( objDesc != null ) {
         var takeAction = actions.getAction( "take" );
-        toret = s.obj1.desc;
+        toret = objDesc.desc;
 
-        if ( s.obj1.isOpen()
-          && s.obj1.objs.length > 0 )
+        if ( objDesc.isOpen()
+          && objDesc.objs.length > 0 )
         {
             var vCogibles = [];
             var vExaminables = [];
 
             // Crear vector de objetos cogibles
             // y otro con aquellos solo examinables
-            for(var i = 0; i < s.obj1.objs.length; ++i) {
-                if ( s.obj1.objs[ i ].isScenery() ) {
-                    vExaminables.push( s.obj1.objs[ i ] );
+            for(var i = 0; i < objDesc.objs.length; ++i) {
+                if ( objDesc.objs[ i ].isScenery() ) {
+                    vExaminables.push( objDesc.objs[ i ] );
                 } else {
-                    vCogibles.push( s.obj1.objs[ i ] );
+                    vCogibles.push( objDesc.objs[ i ] );
                 }
             }
 
@@ -54,20 +57,22 @@ examineAction.exe = function(s) {
 
 examineAction.doIt = function(s) {
     var toret = "No veo de eso en derredor.";
+    var objDest = s.obj1;
 
     if ( s.term1 == null ) {
         toret = "Deber&iacute;as especificar qu&eacute;.";
     }
     else
-    if ( s.obj1 != null ) {
-        if ( typeof( s.obj1.preExamine ) === "function" ) {
-            toret = s.obj1.preExamine();
+    if ( objDest != null ) {
+        if ( typeof( objDest.preExamine ) === "function" ) {
+            toret = objDest.preExamine();
         } else {
             toret = this.exe( s );
         }
 
-        if ( typeof( s.obj1.postExamine ) === "function" ) {
-            s.obj1.postExamine();
+        objDest.examinations++;
+        if ( typeof( objDest.postExamine ) === "function" ) {
+            objDest.postExamine();
         }
     }
 
@@ -85,13 +90,14 @@ var attackAction = actions.crea( "attack",
 
 attackAction.exe = function(s) {
     var toret = "No veo de eso en derredor.";
+    var objDest = s.obj1;
 
     if ( s.term1 == null ) {
         toret = "Deber&iacute;as especificar qu&eacute;.";
     }
     else
-    if ( s.obj1 != null ) {
-        if ( s.obj1.isReachable() ) {
+    if ( objDest != null ) {
+        if ( objDest.isReachable() ) {
             toret = "La violencia no es la soluci&oacute;n.";
         } else {
             toret = "Demasiado lejos.";
@@ -103,20 +109,23 @@ attackAction.exe = function(s) {
 
 attackAction.doIt = function(s) {
     var toret = "No veo de eso en derredor.";
+    var objDest = s.obj1;
 
     if ( s.term1 == null ) {
         toret = "Deber&iacute;as especificar qu&eacute;.";
     }
     else
-    if ( s.obj1 != null ) {
-        if ( typeof( s.obj1.preAttack ) === "function" ) {
-            toret = s.obj1.preAttack();
+    if ( objDest != null ) {
+        if ( typeof( objDest.preAttack ) === "function" )
+        {
+            toret = objDest.preAttack();
         } else {
             toret = this.exe( s );
         }
 
-        if ( typeof( s.obj1.postAttack ) === "function" ) {
-            s.obj1.postAttack();
+        if ( typeof( objDest.postAttack ) === "function" )
+        {
+            objDest.postAttack();
         }
     }
 
@@ -127,18 +136,21 @@ attackAction.doIt = function(s) {
 var startAction = actions.crea( "start",
         [ "enciende", "encender", "enciendo",
           "arranca", "arrancar", "arranco",
-          "activa", "activar", "activo" ]
+          "activa", "activar", "activo",
+          "quema", "quemar", "quemo"
+        ]
 );
 
 startAction.exe = function(s) {
     var toret = "No veo de eso en derredor.";
+    var objDest = s.obj1;
 
     if ( s.term1 == null ) {
         toret = "Deber&iacute;as especificar qu&eacute;.";
     }
     else
-    if ( s.obj1 != null ) {
-        if ( s.obj1.isReachable() ) {
+    if ( objDest != null ) {
+        if ( objDest.isReachable() ) {
             toret = "Al final, decides no hacerlo.";
         } else {
             toret = "Demasiado lejos.";
@@ -150,20 +162,20 @@ startAction.exe = function(s) {
 
 startAction.doIt = function(s) {
     var toret = "No veo de eso en derredor.";
+    var objDest = s.obj1;
 
     if ( s.term1 == null ) {
         toret = "Deber&iacute;as especificar qu&eacute;.";
     }
-    else
-    if ( s.obj1 != null ) {
-        if ( typeof( s.obj1.preStart ) === "function" ) {
-            toret = s.obj1.preStart();
+    else {
+        if ( typeof( objDest.preStart ) === "function" ) {
+            toret = objDest.preStart();
         } else {
             toret = this.exe( s );
         }
 
-        if ( typeof( s.obj1.postStart ) === "function" ) {
-            s.obj1.postStart();
+        if ( typeof( objDest.postStart ) === "function" ) {
+            objDest.postStart();
         }
     }
 
@@ -178,13 +190,14 @@ var shutdownAction = actions.crea( "shutdown",
 
 shutdownAction.exe = function(s) {
     var toret = "No veo de eso en derredor.";
+    var objDest = s.obj1;
 
     if ( s.term1 == null ) {
         toret = "Deber&iacute;as especificar qu&eacute;.";
     }
     else
-    if ( s.obj1 != null ) {
-        if ( s.obj1.isReachable() ) {
+    if ( objDest != null ) {
+        if ( objDest.isReachable() ) {
             toret = "Al final, decides no hacerlo.";
         } else {
             toret = "Demasiado lejos.";
@@ -196,20 +209,22 @@ shutdownAction.exe = function(s) {
 
 shutdownAction.doIt = function(s) {
     var toret = "No veo de eso en derredor.";
+    var objDest = s.obj1;
 
     if ( s.term1 == null ) {
         toret = "Deber&iacute;as especificar qu&eacute;.";
     }
     else
-    if ( s.obj1 != null ) {
-        if ( typeof( s.obj1.preShutdown ) === "function" ) {
-            toret = s.obj1.preShutdown();
+    if ( objDest != null ) {
+        if ( typeof( objDest.preShutdown ) === "function" ) {
+            toret = objDest.preShutdown();
         } else {
             toret = this.exe( s );
         }
 
-        if ( typeof( s.obj1.postShutdown ) === "function" ) {
-            s.obj1.postShutdown();
+        if ( typeof( objDest.postShutdown ) === "function" )
+        {
+            objDest.postShutdown();
         }
     }
 
@@ -223,7 +238,7 @@ lookAction.transInput = function(s) {
     // Look x "mirar x" = examine x
     if ( lookAction.match( s )
       && s.term1 != null
-      && s.prep == null )
+      && s.prep != "en" )
     {
 		s.verb = examineAction.verbs[ 0 ];
     }
@@ -245,8 +260,7 @@ lookAction.doIt = function(s) {
         this.exe( s );
     }
 
-    if ( typeof( loc.postLook ) === "function" )
-    {
+    if ( typeof( loc.postLook ) === "function" ) {
         loc.postLook();
     }
 
@@ -279,8 +293,8 @@ inventoryAction.doIt = function(s) {
         toret = this.exe( s );
     }
 
-    if ( typeof( player.postInv ) === "function" )
-    {
+    player = ctrl.personas.getPlayer(); // In case it changed...
+    if ( typeof( player.postInv ) === "function" ) {
         player.postInv();
     }
 
@@ -462,7 +476,7 @@ enterAction.exe = function(s, obj) {
     if ( arguments.length < 2
       || obj == null )
     {
-		obj = this.getDestObj();
+		obj = this.getDestObj( s );
 	}
 
     if ( obj != null ) {
@@ -478,18 +492,18 @@ enterAction.exe = function(s, obj) {
 
 enterAction.doIt = function(s) {
     var toret = "No hay de eso por aqu&iacute;.";
-    var objDest = this.getDestObj(s);
+    var objDest = this.getDestObj( s );
 
     if ( objDest != null ) {
-      if ( typeof( objDest.preEnter ) === "function" ) {
-          toret = objDest.preEnter();
-      } else {
-          toret = this.exe( s );
-      }
+        if ( typeof( objDest.preEnter ) === "function" ) {
+            toret = objDest.preEnter();
+        } else {
+            toret = this.exe( s );
+        }
 
-      if ( typeof( objDest.postEnter ) === "function" ) {
-        objDest.postEnter();
-      }
+        if ( typeof( objDest.postEnter ) === "function" ) {
+            objDest.postEnter();
+        }
     }
 
     return toret;
@@ -539,15 +553,15 @@ exitAction.doIt = function(s) {
     var objDest = this.getDestObj( s );
 
     if ( objDest != null ) {
-      if ( typeof( objDest.preExit ) === "function" ) {
-          toret = objDest.preExit();
-      } else {
-          toret = this.exe( s );
-      }
+        if ( typeof( objDest.preExit ) === "function" ) {
+            toret = objDest.preExit();
+        } else {
+            toret = this.exe( s );
+        }
 
-      if ( typeof( objDest.postExit ) === "function" ) {
-        objDest.postExit();
-      }
+        if ( typeof( objDest.postExit ) === "function" ) {
+            objDest.postExit();
+        }
     }
 
     return toret;
@@ -584,15 +598,15 @@ pushAction.doIt = function(s) {
     var objDest = s.obj1;
 
     if ( objDest != null ) {
-      if ( typeof( objDest.prePush ) === "function" ) {
-        toret = objDest.prePush();
-      } else {
-        toret = this.exe( s );
-      }
+        if ( typeof( objDest.prePush ) === "function" ) {
+            toret = objDest.prePush();
+        } else {
+            toret = this.exe( s );
+        }
 
-      if ( typeof( objDest.postPush ) === "function" ) {
-        objDest.postPush();
-      }
+        if ( typeof( objDest.postPush ) === "function" ) {
+            objDest.postPush();
+        }
     } else {
         toret = "No hay de eso por aqu&iacute;.";
     }
@@ -645,15 +659,15 @@ pullAction.doIt = function(s) {
     var objDest = s.obj1;
 
     if ( objDest != null ) {
-      if ( typeof( objDest.prePull ) === "function" ) {
-        toret = objDest.prePull();
-      } else {
-        toret = this.exe( s );
-      }
+        if ( typeof( objDest.prePull ) === "function" ) {
+            toret = objDest.prePull();
+        } else {
+            toret = this.exe( s );
+        }
 
-      if ( typeof( objDest.postPull ) === "function" ) {
-          objDest.postPull();
-      }
+        if ( typeof( objDest.postPull ) === "function" ) {
+            objDest.postPull();
+        }
     } else {
         toret = "No hay de eso por aqu&iacute;.";
     }
@@ -704,16 +718,20 @@ dropAction.exe = function(s, obj, cont, persona) {
         // The very same place?
         if ( obj.owner === persona ) {
             if ( cont.isReachable() ) {
-                if ( cont.isContainer() ) {
+                if ( cont.isOpen() ) {
+                    if ( cont.isContainer() ) {
 
-                    if ( obj.isClothing() ) {
-                        obj.setWorn( false );
+                        if ( obj.isClothing() ) {
+                            obj.setWorn( false );
+                        }
+
+                        obj.moveTo( cont );
+                        toret = "Hecho.";
+                    } else {
+                        toret = "No parece apropiado.";
                     }
-
-                    obj.moveTo( cont );
-                    toret = "Hecho.";
                 } else {
-                    toret = "No parece apropiado.";
+                    toret = "Est&aacute; cerrado.";
                 }
             } else {
                 toret = "Demasiado lejos.";
@@ -1052,8 +1070,9 @@ searchAction.transInput = function(s) {
     var searchAction = actions.getAction( "search" );
 
     // Look in "mirar en" = search "registra"
-    if ( lookAction.match( s )
-      && s.prep === "en" )
+    if ( ( lookAction.match( s )
+        || examineAction.match( s ) )
+      && s.prep != null )
     {
 		s.prep = "";
 		s.verb = searchAction.verbs[ 0 ];
@@ -1935,6 +1954,50 @@ tieAction.doIt = function(s)
     return toret;
 }
 
+// --------------------------------------------------------- Untie
+var untieAction = actions.crea( "untie",
+        [ "desata", "desatar", "desato",
+          "desanudar", "desanuda", "desanudo"
+        ]
+);
+
+untieAction.exe = function(s) {
+    var toret = "No veo de eso en derredor.";
+
+    if ( s.term1 == null ) {
+        toret = "Deber&iacute;as especificar qu&eacute;.";
+    }
+    else
+    if ( s.obj1 != null ) {
+        toret = "No tiene sentido.";
+    }
+
+    return toret;
+};
+
+untieAction.doIt = function(s) {
+    var toret = "No veo de eso en derredor.";
+    var objDest = s.obj1;
+
+    if ( s.term1 == null ) {
+        toret = "Deber&iacute;as especificar qu&eacute;.";
+    }
+    else
+    if ( objDest != null ) {
+        if ( typeof( objDest.preUntie ) === "function" ) {
+            toret = objDest.preUntie();
+        } else {
+            toret = this.exe( s );
+        }
+
+        if ( typeof( objDest.postUntie ) === "function" ) {
+            objDesc.postUntie();
+        }
+    }
+
+    return toret;
+};
+
 // ---------------------------------------------------------------- Dig
 var digAction = actions.crea( "dig",
 	[ "cava", "cavar", "cavo", "excava", "excavar", "excavo" ]
@@ -2123,29 +2186,24 @@ wearAction.doIt = function(s)
 
 	if ( s.term1 == null ) {
 		toret = "Deber&iacuteas especificar lo qu&eacute;.";
-	}
-    else {
+	} else {
 		if ( objDest == null ) {
 			toret = "No veo eso en derredor.";
 		}
 		else {
             if ( !player.has( objDest ) ) {
-                actions.execute( "take", s.term1 );
+                toret = "No llevas eso contigo.";
+            } else {
+                if ( typeof( objDest.preWear ) === "function" ) {
+                    toret = objDest.preWear();
+                } else {
+                    toret = this.exe( s );
+                }
 
-                if ( !player.has( objDest ) ) {
-                    return;
+                if ( typeof( objDest.postWear ) === "function" ) {
+                    objDest.postWear();
                 }
             }
-
-			if ( typeof( objDest.preWear ) === "function" ) {
-				toret = objDest.preWear();
-			} else {
-				toret = this.exe( s );
-			}
-
-			if ( typeof( objDest.postWear ) === "function" ) {
-				objDest.postWear();
-			}
 		}
 	}
 
@@ -2259,6 +2317,48 @@ statusAction.doIt = function(s) {
     return toret;
 }
 
+// ---------------------------------------------------------------- Save
+var saveAction = actions.crea( "save",
+	[ "save" ]
+);
+
+saveAction.exe = function(s) {
+    var toret = "";
+
+    if ( ctrl.save() ) {
+        toret += "Situaci&oacute;n guardada.";
+    } else {
+        toret += "Error guardando situaci&oacute;n (localStorage no soportado?).";
+    }
+
+    return toret;
+}
+
+saveAction.doIt = function(s) {
+    return this.exe( s )
+}
+
+// ---------------------------------------------------------------- Load
+var loadAction = actions.crea( "load",
+	[ "load" ]
+);
+
+loadAction.exe = function(s) {
+    var toret = "";
+
+    if ( ctrl.load() ) {
+        toret += "Situaci&oacute;n recuperada.";
+    } else {
+        toret += "No se ha encontrado ninguna situaci&oacute;n guardada.";
+    }
+
+    return toret;
+}
+
+loadAction.doIt = function(s) {
+    return this.exe( s )
+}
+
 // ---------------------------------------------------------------- Wait
 var waitAction = actions.crea( "wait",
 	[ "espera", "z" ]
@@ -2283,4 +2383,39 @@ waitAction.doIt = function(s) {
     }
 
     return toret;
+}
+
+// ---------------------------------------------------------------- Help
+var helpAction = actions.crea( "help",
+	[ "ayuda", "help", "pistas", "pista" ]
+);
+
+helpAction.exe = function(s) {
+    return "Te encuentras ante un <b>relato <i>interactivo</i></b>.<br>\
+            Puedes utilizar el rat&oacute;n con los iconos inferiores, \
+            y los objetos a su derecha. Por otra parte, tambi&eacute;n \
+            puedes lanzar acciones con los enlaces dentro del texto (las \
+            m&aacute;s comunes son examinar o coger).<br>\
+            <br>\
+            Las acciones m&aacute;s comunes son:<br><ul>\
+            <li><b>(n)orte, (s)ur, (e)ste, (o)este</b>: Mueve al personaje hacia \
+            adelante, atr&aacute;s, derecha e izquierda.</li>\
+            <li><b>arriba, abajo</b>: Mueve al personaje hacia arriba o abajo.</li>\
+            <li><b>(ex)amina objeto</b>: Da una descripci&oacute;n m&aacute;s \
+            detallada del objeto.</li>\
+            <li><b>coge objeto/deja objeto</b>: Recoge o suelta un objeto.</li>\
+            <li><b>(i)nventario</b>: Muestra los objetos recogidos.</li>\
+            <li><b>empuja objeto / tira de objeto</b>: Empuja o tira de un objeto</li>\
+            <li><b>abrir objeto / cerrar objeto</b>: Abre o cierra un objeto</li>\
+            <li><b>golpea objeto / ataca personaje</b>: Golpea a un objeto o personaje.</li>\
+            <li><b>habla con personaje</b>: Entabla una conversaci&oacute;n.</li>\
+            <li><b>enciende objeto/apaga objeto</b>: Enciende o apaga un objeto.</li>\
+            <li><b>save</b>: Guarda la situación actual.</li>\
+            <li><b>load</b>: recupera una situación guardada previamente.</li>\
+            </ul><br>\
+            Las &oacute;rdenes pueden darse en infinitivo o imperativo.<br>";
+}
+
+helpAction.doIt = function(s) {
+    return this.exe( s )
 }
