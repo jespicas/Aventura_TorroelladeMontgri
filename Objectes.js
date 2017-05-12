@@ -8,7 +8,7 @@ var objPou = ctrl.creaObj(
    var objCartellCami = ctrl.creaObj(
      "Cartell cami al castell",
      ["cartell"],
-      "Un cartell de color verd indicant la dirrecio a seguir per arribar al castell. S'hi pot llegir Castell del Montgrí.",
+      "Un cartell de color verd indicant la direccio a seguir per arribar al castell. S'hi pot llegir Castell del Montgrí.",
       locCami,
       Ent.Escenario);
 
